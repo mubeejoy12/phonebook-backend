@@ -1,0 +1,19 @@
+GET http://localhost:3003/api/persons
+###
+GET  http://localhost:3003/info
+
+###
+GET http://localhost:3003/api/persons/2
+
+###
+DELETE http://localhost:3003/api/persons/2
+
+
+### Add a new person
+POST http://localhost:3003/api/persons
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "number": "123-456789"
+}
