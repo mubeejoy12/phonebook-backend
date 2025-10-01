@@ -1,10 +1,13 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const morgan = require("morgan");
+app.use(cors());
 
 app.use(express.json());
+app.use(express.static("dist"));
 
-const PORT = 3003;
+const PORT = process.env.PORT || 3003;
 
 let persons = [
   { id: "1", name: "Arto Hellas", number: "040-123456" },
@@ -15,11 +18,13 @@ let persons = [
 
 // ✅ Create a custom Morgan token
 morgan.token("body", (req) => {
-    return req.method === "POST" ? JSON.stringify(req.body) : "";
-  });
-  
-  // ✅ Use the custom format including :body
-  app.use(morgan(":method :url :status :res[content-length] - :response-time ms :body"));
+  return req.method === "POST" ? JSON.stringify(req.body) : "";
+});
+
+// ✅ Use the custom format including :body
+app.use(
+  morgan(":method :url :status :res[content-length] - :response-time ms :body")
+);
 
 // POST new person
 app.post("/api/persons", (req, res) => {
