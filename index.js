@@ -30,6 +30,12 @@ app.use(
 app.post("/api/persons", (req, res) => {
   const body = req.body;
 
+  // fallback: if no API route matched, send index.html
+  const path = require("path");
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "dist", "index.html"));
+  });
+
   // 1. Check if name or number missing
   if (!body.name || !body.number) {
     return res.status(400).json({ error: "name or number missing" });
