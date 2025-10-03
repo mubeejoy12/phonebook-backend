@@ -1,13 +1,21 @@
+require('dotenv').config()
 const express = require("express");
 const app = express();
 const cors = require("cors");
 const morgan = require("morgan");
 app.use(cors());
+const mongoose = require('mongoose')
 
 app.use(express.json());
 app.use(express.static("dist"));
+mongoose.set('strictQuery', false)
 
 const PORT = process.env.PORT || 3003;
+
+
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ connected to MongoDB'))
+  .catch(error => console.error('❌ error connecting to MongoDB:', error.message))
 
 let persons = [
   { id: "1", name: "Arto Hellas", number: "040-123456" },
