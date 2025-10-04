@@ -1,34 +1,54 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 
-if (!process.env.MONGODB_URI) {
-  console.log("❌ No MongoDB URI found in .env");
-  process.exit(1);
-}
-
 mongoose.set("strictQuery", false);
 
+const url = process.env.MONGODB_URI;
+
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(url)
   .then(() => {
     console.log("✅ connected to MongoDB");
+
+    const personSchema = new mongoose.Schema({
+      name: String,
+      number: String,
+    });
+
+    const Person = mongoose.model("Person", personSchema);
+
+    const args = process.argv.slice(2);
+
+    if (args.length === 0) {
+      // 👉 list all persons
+      Person.find({})
+        .then((result) => {
+          console.log("📖 Phonebook:");
+          result.forEach((person) => {
+            console.log(`${person.name} ${person.number}`);
+          });
+        })
+        .finally(() => mongoose.connection.close());
+    } else if (args.length === 2) {
+      // 👉 add a new person
+      const person = new Person({
+        name: args[0],
+        number: args[1],
+      });
+
+      person
+        .save()
+        .then(() => {
+          console.log(`➕ added ${args[0]} number ${args[1]} to phonebook`);
+        })
+        .finally(() => mongoose.connection.close());
+    } else {
+      console.log("⚠️ Usage:");
+      console.log("  node mongo.js              -> list all persons");
+      console.log('  node mongo.js "Name" "123" -> add a new person');
+      mongoose.connection.close();
+    }
   })
   .catch((error) => {
     console.log("❌ error connecting to MongoDB:", error.message);
   });
-
-const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
-});
-
-const Person = mongoose.model("Person", personSchema);
-
-// Example: fetch all persons
-Person.find({}).then((result) => {
-  console.log("📖 Persons in DB:");
-  result.forEach((person) => {
-    console.log(person);
-  });
-  mongoose.connection.close();
-});
