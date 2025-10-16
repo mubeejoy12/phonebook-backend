@@ -182,6 +182,28 @@ app.get("/info", (req, res) => {
   });
 });
 
+// --- Unknown Endpoint Handler ---
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+app.use(unknownEndpoint)
+
+// --- Error Handler (⚠️ place this LAST) ---
+const errorHandler = (error, request, response, next) => {
+  console.error('Error:', error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  } else if (error.name === 'MongoServerError' && error.code === 11000) {
+    return response.status(400).json({ error: 'Name must be unique' })
+  }
+
+  next(error)
+}
+
+app.use(errorHandler) // must be the LAST middleware
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
